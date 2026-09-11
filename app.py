@@ -36,6 +36,11 @@ def install_bioinformatics_tools():
 # ஆப் தொடங்கும்போதே இந்த இன்ஸ்டாலேஷன் ஃபங்ஷன் ரன் ஆகும்
 install_bioinformatics_tools()
 # ----------------------------------------------------------------------
+import os
+# 
+abricate_bin_path = os.path.abspath("abricate-master/bin")
+if abricate_bin_path not in os.environ["PATH"]:
+    os.environ["PATH"] += os.path.pathsep + abricate_bin_path
 
 from main import run_pipeline
 from src.streamlit_explainability import render_explainability_page
