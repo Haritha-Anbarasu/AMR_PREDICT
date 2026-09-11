@@ -56,7 +56,7 @@ page = st.sidebar.radio(
     ["Home", "Genome Quality", "ARG Screening", "Results Table", "Explainability", "Download Report"],
 )
 
-# ---------------- Home ----------------
+# ---------------- Home ---------------
 if page == "Home":
     st.title("AMR-PREDICT")
     st.subheader("Machine Learning-Based Antibiotic Resistance Gene Prediction")
