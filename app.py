@@ -11,7 +11,7 @@ import subprocess
 from pathlib import Path
 
 # ==================== ABRICATE ENVIRONMENT ENFORCEMENT ====================
-# உங்களுடைய Streamlit சர்வரில் டவுன்லோட் ஆன ஏப்ரிகேட் பாதையை CLI பைப்லைனுக்கும் பகிர்கிறோம்
+# 
 abricate_bin_path = os.path.abspath("abricate-master/bin")
 if abricate_bin_path not in os.environ["PATH"]:
     os.environ["PATH"] += os.path.pathsep + abricate_bin_path
