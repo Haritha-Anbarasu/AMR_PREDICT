@@ -12,7 +12,7 @@ import streamlit as st
 import pandas as pd
 from pathlib import Path
 
-# --- ABRicate Autoinstall & DB Setup (Streamlit Deployment Fix) ---
+# --- ABRicate Autoinstall & DB Setup (Streamlit Deployment Fix) --
 @st.cache_resource
 def install_bioinformatics_tools():
     # 1. ABRicate டவுன்லோட் & PATH செட்டப்
