@@ -12,28 +12,20 @@ import streamlit as st
 import pandas as pd
 from pathlib import Path
 
-# --- ABRicate & CD-HIT Autoinstall Setup (Streamlit Deployment Fix) ---
+# --- ABRicate Autoinstall Setup (Streamlit Deployment Fix) ---
 @st.cache_resource
 def install_bioinformatics_tools():
-    # 1. CD-HIT  (Ubuntu APT)
-    if subprocess.run("which cd-hit", shell=True, capture_output=True).returncode != 0:
-        st.info("Installing CD-HIT in background...")
-        os.system("sudo apt-get update && sudo apt-get install -y cd-hit")
-
-    # 2. ABRicate & PATH 
+    # Only handles ABRicate local download and path registration (cd-hit and sudo safely removed)
     if subprocess.run("which abricate", shell=True, capture_output=True).returncode != 0:
-        st.info("Downloading and configuring ABRicate...")
-        # ABRicate GitHub-
         if not os.path.exists("abricate-master"):
-            os.system("wget -q https://github.com/tseemann/abricate/archive/refs/heads/master.zip")
+            os.system("curl -L -s https://github.com -o master.zip")
             os.system("unzip -q master.zip && rm master.zip")
         
-        # ABRicate
         abricate_bin_path = os.path.abspath("abricate-master/bin")
         if abricate_bin_path not in os.environ["PATH"]:
             os.environ["PATH"] += os.path.pathsep + abricate_bin_path
 
-
+# Execute safe initialization steps at startup
 install_bioinformatics_tools()
 # ----------------------------------------------------------------------
 
@@ -56,7 +48,7 @@ page = st.sidebar.radio(
     ["Home", "Genome Quality", "ARG Screening", "Results Table", "Explainability", "Download Report"],
 )
 
-# ---------------- Home ---------------
+# ---------------- Home ----------------
 if page == "Home":
     st.title("AMR-PREDICT")
     st.subheader("Machine Learning-Based Antibiotic Resistance Gene Prediction")
