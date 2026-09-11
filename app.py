@@ -15,25 +15,25 @@ from pathlib import Path
 # --- ABRicate & CD-HIT Autoinstall Setup (Streamlit Deployment Fix) ---
 @st.cache_resource
 def install_bioinformatics_tools():
-    # 1. CD-HIT இன்ஸ்டாலேஷன் (Ubuntu APT வழியாக)
+    # 1. CD-HIT  (Ubuntu APT)
     if subprocess.run("which cd-hit", shell=True, capture_output=True).returncode != 0:
         st.info("Installing CD-HIT in background...")
         os.system("sudo apt-get update && sudo apt-get install -y cd-hit")
 
-    # 2. ABRicate டவுன்লোட் & PATH செட்டப்
+    # 2. ABRicate & PATH 
     if subprocess.run("which abricate", shell=True, capture_output=True).returncode != 0:
         st.info("Downloading and configuring ABRicate...")
-        # ABRicate GitHub-ல் இருந்து டவுன்লোட் செய்தல்
+        # ABRicate GitHub-
         if not os.path.exists("abricate-master"):
             os.system("wget -q https://github.com/tseemann/abricate/archive/refs/heads/master.zip")
             os.system("unzip -q master.zip && rm master.zip")
         
-        # ABRicate-ன் எக்ஸிகியூட்டபிள் பாத்-ஐ சிஸ்டம் PATH-ல் சேர்த்தல்
+        # ABRicate
         abricate_bin_path = os.path.abspath("abricate-master/bin")
         if abricate_bin_path not in os.environ["PATH"]:
             os.environ["PATH"] += os.path.pathsep + abricate_bin_path
 
-# ஆப் தொடங்கும்போதே இந்த இன்ஸ்டாலேஷன் ஃபங்ஷன் ரன் ஆகும்
+
 install_bioinformatics_tools()
 # ----------------------------------------------------------------------
 
