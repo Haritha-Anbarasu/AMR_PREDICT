@@ -6,9 +6,36 @@ Run with: streamlit run app.py
 Pages: Home -> Genome Quality -> ARG Screening -> Results Table
        -> Explainability -> Download Report
 """
+import os
+import subprocess
 import streamlit as st
 import pandas as pd
 from pathlib import Path
+
+# --- ABRicate & CD-HIT Autoinstall Setup (Streamlit Deployment Fix) ---
+@st.cache_resource
+def install_bioinformatics_tools():
+    # 1. CD-HIT இன்ஸ்டாலேஷன் (Ubuntu APT வழியாக)
+    if subprocess.run("which cd-hit", shell=True, capture_output=True).returncode != 0:
+        st.info("Installing CD-HIT in background...")
+        os.system("sudo apt-get update && sudo apt-get install -y cd-hit")
+
+    # 2. ABRicate டவுன்লোட் & PATH செட்டப்
+    if subprocess.run("which abricate", shell=True, capture_output=True).returncode != 0:
+        st.info("Downloading and configuring ABRicate...")
+        # ABRicate GitHub-ல் இருந்து டவுன்লোட் செய்தல்
+        if not os.path.exists("abricate-master"):
+            os.system("wget -q https://github.com/tseemann/abricate/archive/refs/heads/master.zip")
+            os.system("unzip -q master.zip && rm master.zip")
+        
+        # ABRicate-ன் எக்ஸிகியூட்டபிள் பாத்-ஐ சிஸ்டம் PATH-ல் சேர்த்தல்
+        abricate_bin_path = os.path.abspath("abricate-master/bin")
+        if abricate_bin_path not in os.environ["PATH"]:
+            os.environ["PATH"] += os.path.pathsep + abricate_bin_path
+
+# ஆப் தொடங்கும்போதே இந்த இன்ஸ்டாலேஷன் ஃபங்ஷன் ரன் ஆகும்
+install_bioinformatics_tools()
+# ----------------------------------------------------------------------
 
 from main import run_pipeline
 from src.streamlit_explainability import render_explainability_page
@@ -42,12 +69,6 @@ if page == "Home":
         tmp_path.write_bytes(uploaded.getvalue())
 
         with st.spinner("Running pipeline — this can take a few minutes..."):
-            # run_pipeline() returns a dict — results, qc, and the scaled
-            # feature matrix needed for SHAP are all stored here so every
-            # page below has what it needs (previously qc and the feature
-            # matrix were discarded after the pipeline run, which is why
-            # the Genome Quality page never showed anything and the
-            # Explainability page was a placeholder).
             pipeline_output = run_pipeline(str(tmp_path), "results/streamlit_run")
             st.session_state.results = pipeline_output["results"]
             st.session_state.qc = pipeline_output["qc"]
