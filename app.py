@@ -12,20 +12,28 @@ import streamlit as st
 import pandas as pd
 from pathlib import Path
 
-# --- ABRicate Autoinstall Setup (Streamlit Deployment Fix) --
+# --- ABRicate Autoinstall & DB Setup (Streamlit Deployment Fix) ---
 @st.cache_resource
 def install_bioinformatics_tools():
-    # Only handles ABRicate local download and path registration (cd-hit and sudo safely removed)
+    # 1. ABRicate டவுன்லோட் & PATH செட்டப்
     if subprocess.run("which abricate", shell=True, capture_output=True).returncode != 0:
         if not os.path.exists("abricate-master"):
-            os.system("curl -L -s https://github.com -o master.zip")
-            os.system("unzip -q master.zip && rm master.zip")
+            with st.spinner("Configuring ABRicate and dependencies..."):
+                os.system("curl -L -s https://github.com -o master.zip")
+                os.system("unzip -q master.zip && rm master.zip")
         
         abricate_bin_path = os.path.abspath("abricate-master/bin")
         if abricate_bin_path not in os.environ["PATH"]:
             os.environ["PATH"] += os.path.pathsep + abricate_bin_path
+            
+    # 2. ABRicate டேட்டாபேஸ் செட்டப் பரிசோதனை (CARD/NCBI DB Fix)
+    if os.path.exists("abricate-master/bin/abricate"):
+        db_check = subprocess.run("abricate --list", shell=True, capture_output=True, text=True)
+        if "card" not in db_check.stdout.lower():
+            with st.spinner("Downloading AMR Databases (CARD, NCBI)... This takes a moment."):
+                os.system("abricate --setupdb")
 
-# Execute safe initialization steps at startup
+# ஆப் தொடங்கும்போதே இந்த இன்ஸ்டாலேஷன் ஃபங்ஷன் ரன் ஆகும்
 install_bioinformatics_tools()
 # ----------------------------------------------------------------------
 
