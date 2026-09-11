@@ -1,0 +1,100 @@
+# =====================================================================
+# AMR-PREDICT Configuration
+#
+# Every tunable parameter in the pipeline is defined here rather than
+# hardcoded inside individual scripts. This is standard practice for
+# reproducible bioinformatics pipelines: a single config file can be
+# version-controlled, cited in a Methods section, and swapped wholesale
+# to re-run the pipeline under different conditions without touching code.
+#
+# Loaded by src/config.py — see that file for usage.
+# =====================================================================
+
+# Global random seed used by every train/test split, every model
+# (RandomForest, XGBoost, LightGBM), and every stochastic subsampling
+# step in the pipeline. Fixing this everywhere is what makes reported
+# metrics reproducible run-to-run — a requirement for any result quoted
+# in a dissertation or manuscript.
+random_seed: 42
+
+paths:
+  data_dir: data
+  training_dir: data/training
+  positive_dir: data/training/positive
+  negative_dir: data/training/negative
+  processed_dir: data/processed
+  models_dir: models
+  results_dir: results
+  reports_dir: reports
+  logs_dir: logs
+
+# --- Dataset construction parameters ---
+dataset:
+  # CD-HIT sequence-identity threshold used for BOTH the positive and
+  # negative sets, so cluster boundaries are computed consistently
+  # before the two classes are merged.
+  cdhit_identity: 0.90
+
+  # Target size for the negative class after CD-HIT + subsampling, used
+  # to keep the dataset roughly class-balanced. Adjust after checking
+  # the actual positive set size from reports/dataset_versions.csv.
+  negative_target_count: 3000
+
+  # Genes shorter than this are dropped before feature extraction —
+  # very short ORFs are frequently Prodigal false-positives or
+  # fragments and add noise rather than signal to either class.
+  min_gene_length_bp: 100
+
+  # Cluster-aware split ratios (must sum to 1.0). Splitting is done by
+  # CD-HIT cluster membership, not by individual sequence, so no cluster
+  # straddles train/val/test — this is what prevents near-duplicate
+  # sequence leakage inflating reported test performance.
+  train_ratio: 0.70
+  val_ratio: 0.15
+  test_ratio: 0.15
+
+# --- Feature engineering parameters ---
+features:
+  # k-mer size for nucleotide composition features. k=3 (64 features)
+  # is the standard starting point — see sequence_features.py docstring
+  # for the rationale on why higher k is not used by default.
+  kmer_size: 3
+
+# --- Model training parameters ---
+model:
+  models_to_train:
+    - random_forest
+    - xgboost
+    - lightgbm          # optional — set enabled: false below to skip
+
+  lightgbm_enabled: true
+
+  cv_folds: 5
+
+  # 'randomized' (RandomizedSearchCV) is the default: on a 16GB/Ryzen 5
+  # laptop, a full GridSearchCV over multiple models is often impractical
+  # within a two-week timeline. RandomizedSearchCV with a capped
+  # n_iter gives comparable tuning quality at a fraction of the compute
+  # cost — a defensible, commonly-used tradeoff to cite in a Methods
+  # section. Switch to 'grid' if time/compute allows.
+  hyperparameter_search: randomized
+  n_iter_randomized_search: 25
+
+  # Minimum number of training examples a drug class needs to be
+  # included in the multiclass model. Classes below this threshold are
+  # dropped (and logged) rather than trained on — a class with only a
+  # handful of examples produces an unreliable per-class estimate that
+  # drags down the overall reported metrics more than omitting it does.
+  multiclass_min_class_samples: 15
+
+  # Probability thresholds used by the hybrid decision engine
+  # (src/decision_engine.py) — kept here so they can be tuned/validated
+  # in one place rather than hardcoded across modules.
+  confidence_thresholds:
+    high: 0.90
+    moderate: 0.70
+
+# --- Logging ---
+logging:
+  log_file: pipeline.log
+  level: INFO

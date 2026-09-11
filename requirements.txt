@@ -1,0 +1,18 @@
+biopython
+pandas
+numpy
+scikit-learn
+xgboost
+lightgbm
+shap
+matplotlib
+plotly
+streamlit
+joblib
+pyyaml
+tqdm
+
+# External command-line tools (install via conda, not pip):
+#   prodigal   -> conda install -c bioconda prodigal
+#   abricate   -> conda install -c bioconda -c conda-forge abricate
+#   cd-hit     -> conda install -c bioconda cd-hit
