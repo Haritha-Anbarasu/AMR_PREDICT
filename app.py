@@ -13,7 +13,7 @@ import streamlit as st
 import pandas as pd
 from pathlib import Path
 
-# --- PROJECT PATH FIX (ImportError நீக்க சேர்க்கப்படும் வரி) ---
+# --- PROJECT PATH FIX  ---
 # இது 'src' ஃபோல்டரை சிஸ்டம் சரியாகக் கண்டறிய உதவும்
 project_root = os.path.dirname(os.path.abspath(__file__))
 if project_root not in sys.path:
