@@ -31,9 +31,102 @@ page = st.sidebar.radio(
 )
 
 # ---------------- Home ----------------
+DNA_BANNER_SVG = """
+<div style="text-align:center; margin-bottom: 1rem;">
+<svg width="100%" height="140" viewBox="0 0 900 140" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="strandA" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+    <linearGradient id="strandB" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#0891b2"/>
+    </linearGradient>
+  </defs>
+  <path d="M0,20 C 75,90 150,-30 225,20 C 300,90 375,-30 450,20 C 525,90 600,-30 675,20 C 750,90 825,-30 900,20"
+        fill="none" stroke="url(#strandA)" stroke-width="6" stroke-linecap="round"/>
+  <path d="M0,110 C 75,40 150,160 225,110 C 300,40 375,160 450,110 C 525,40 600,160 675,110 C 750,40 825,160 900,110"
+        fill="none" stroke="url(#strandB)" stroke-width="6" stroke-linecap="round"/>
+  <g stroke="#94a3b8" stroke-width="2">
+    <line x1="37"  y1="55"  x2="37"  y2="75"/>
+    <line x1="112" y1="65"  x2="112" y2="90"/>
+    <line x1="187" y1="45"  x2="187" y2="70"/>
+    <line x1="262" y1="55"  x2="262" y2="75"/>
+    <line x1="337" y1="65"  x2="337" y2="90"/>
+    <line x1="412" y1="45"  x2="412" y2="70"/>
+    <line x1="487" y1="55"  x2="487" y2="75"/>
+    <line x1="562" y1="65"  x2="562" y2="90"/>
+    <line x1="637" y1="45"  x2="637" y2="70"/>
+    <line x1="712" y1="55"  x2="712" y2="75"/>
+    <line x1="787" y1="65"  x2="787" y2="90"/>
+    <line x1="862" y1="45"  x2="862" y2="70"/>
+  </g>
+</svg>
+</div>
+"""
+
 if page == "Home":
-    st.title("AMR-PREDICT")
-    st.subheader("Machine Learning-Based Antibiotic Resistance Gene Prediction")
+    st.markdown(DNA_BANNER_SVG, unsafe_allow_html=True)
+
+    st.markdown(
+        """
+        # 🧬 AMR-PREDICT
+        ### Machine Learning-Based Antibiotic Resistance Gene Prediction
+
+        **A computational platform for sequence-based prediction of antibiotic resistance genes**
+
+        Antimicrobial resistance (AMR) is a major global health concern, driven in part by the
+        acquisition and dissemination of **antibiotic resistance genes (ARGs)**. Rapid identification
+        of these genetic determinants is essential for understanding resistance mechanisms and
+        supporting AMR research.
+
+        **AMR-PREDICT** is a machine learning-based bioinformatics application developed to predict
+        potential **antibiotic resistance genes from biological sequence data**. The platform
+        integrates sequence processing, feature extraction, and machine learning to provide a rapid
+        computational approach for ARG prediction.
+        """
+    )
+
+    st.markdown("### 🔬 Analytical Workflow")
+    st.markdown(
+        "**Sequence Input** → **Sequence Processing** → **Feature Extraction** "
+        "→ **Machine Learning Prediction** → **ARG Classification & Results**"
+    )
+
+    st.markdown("### Key Features")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown(
+            "- Sequence-based ARG prediction\n"
+            "- Machine learning-driven classification\n"
+            "- Automated computational analysis"
+        )
+    with col2:
+        st.markdown(
+            "- Rapid screening of sequence data\n"
+            "- User-friendly prediction interface\n"
+            "- Results supporting downstream AMR research"
+        )
+
+    st.markdown("### Research Application")
+    st.markdown(
+        "AMR-PREDICT can facilitate the **preliminary computational screening and characterization "
+        "of potential antibiotic resistance determinants**, providing researchers with a scalable "
+        "approach for investigating AMR-associated sequences."
+    )
+
+    st.markdown(
+        "> **Integrating machine learning and bioinformatics for computational "
+        "antimicrobial resistance research.**"
+    )
+
+    st.warning(
+        "**Research Use Only:** AMR-PREDICT provides computational predictions that should be "
+        "experimentally validated before biological or clinical interpretation."
+    )
+
+    st.divider()
 
     uploaded = st.file_uploader("Upload bacterial genome (FASTA)", type=["fasta", "fna", "fa"])
 
