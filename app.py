@@ -7,41 +7,38 @@ Pages: Home -> Genome Quality -> ARG Screening -> Results Table
        -> Explainability -> Download Report
 """
 import os
-import sys
 import subprocess
 import streamlit as st
 import pandas as pd
 from pathlib import Path
 
-# --- PROJECT PATH FIX  ---
-# இது 'src' ஃபோல்டரை சிஸ்டம் சரியாகக் கண்டறிய உதவும்
-project_root = os.path.dirname(os.path.abspath(__file__))
-if project_root not in sys.path:
-    sys.path.insert(0, project_root)
-# -------------------------------------------------------------
-
-# --- ABRicate Autoinstall & DB Setup (Streamlit Deployment Fix) ---
+# --- ABRicate & CD-HIT Autoinstall Setup (Streamlit Cloud Fix) ---
 @st.cache_resource
 def install_bioinformatics_tools():
-    # 1. ABRicate டவுன்லோட் & PATH செட்டப்
-    if subprocess.run("which abricate", shell=True, capture_output=True).returncode != 0:
-        if not os.path.exists("abricate-master"):
-            with st.spinner("Configuring ABRicate and dependencies..."):
-                os.system("curl -L -s https://github.com -o master.zip")
-                os.system("unzip -q master.zip && rm master.zip")
-        
-        abricate_bin_path = os.path.abspath("abricate-master/bin")
-        if abricate_bin_path not in os.environ["PATH"]:
-            os.environ["PATH"] += os.path.pathsep + abricate_bin_path
+    """
+    Clones and configures ABRicate databases programmatically.
+    System binaries (cd-hit, ncbi-blast+, bioperl) must be declared in packages.txt
+    """
+    abricate_dir = os.path.abspath("abricate-master")
+    abricate_bin = os.path.join(abricate_dir, "bin", "abricate")
+    
+    # If abricate is not downloaded yet, fetch and configure it
+    if not os.path.exists(abricate_dir):
+        with st.spinner("Downloading and configuring ABRicate databases..."):
+            # Programmatically clone the official repository
+            subprocess.run(
+                ["git", "clone", "https://github.com", abricate_dir], 
+                check=True
+            )
+            # CRITICAL STEP: Setup and index the embedded databases (ResFinder, CARD, NCBI, etc.)
+            subprocess.run([abricate_bin, "--setupdb"], check=True)
             
-    # 2. ABRicate டேட்டாபேஸ் செட்டப் பரிசோதனை (CARD/NCBI DB Fix)
-    if os.path.exists("abricate-master/bin/abricate"):
-        db_check = subprocess.run("abricate --list", shell=True, capture_output=True, text=True)
-        if "card" not in db_check.stdout.lower():
-            with st.spinner("Downloading AMR Databases (CARD, NCBI)... This takes a moment."):
-                os.system("abricate --setupdb")
+    # Inject ABRicate binary path directly into the running instance's system PATH
+    abricate_bin_path = os.path.join(abricate_dir, "bin")
+    if abricate_bin_path not in os.environ["PATH"]:
+        os.environ["PATH"] = abricate_bin_path + os.path.pathsep + os.environ["PATH"]
 
-# ஆப் தொடங்கும்போதே இந்த இன்ஸ்டாலேஷன் ஃபங்ஷன் ரன் ஆகும்
+# This runs once immediately when the application container fires up
 install_bioinformatics_tools()
 # ----------------------------------------------------------------------
 
