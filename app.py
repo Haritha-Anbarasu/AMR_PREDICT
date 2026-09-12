@@ -25,22 +25,22 @@ html, body, [class*="css"]  {
 }
 
 .stApp {
-    background: linear-gradient(160deg, #0b1120 0%, #161233 45%, #0b1120 100%);
+    background: linear-gradient(160deg, #eaf3ff 0%, #dbeafe 45%, #eaf3ff 100%);
 }
 
 section[data-testid="stSidebar"] {
-    background: linear-gradient(180deg, #161233 0%, #0b1120 100%);
-    border-right: 1px solid rgba(255,255,255,0.06);
+    background: linear-gradient(180deg, #dbeafe 0%, #eaf3ff 100%);
+    border-right: 1px solid rgba(15, 23, 42, 0.08);
 }
 section[data-testid="stSidebar"] * {
-    color: #e2e8f0 !important;
+    color: #1e293b !important;
 }
 
 h1, h2, h3, h4 {
-    color: #f8fafc !important;
+    color: #0f172a !important;
 }
 p, li, span, label, .stMarkdown {
-    color: #cbd5e1;
+    color: #334155;
 }
 
 .stButton > button {
@@ -102,16 +102,17 @@ p, li, span, label, .stMarkdown {
 }
 
 .metric-card {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.08);
+    background: #ffffff;
+    border: 1px solid rgba(15, 23, 42, 0.08);
     border-left: 5px solid var(--accent, #2563eb);
     border-radius: 12px;
     padding: 1rem 1.3rem;
     margin-bottom: 0.9rem;
+    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.06);
 }
 .metric-card .m-label {
     font-size: 0.8rem;
-    color: #94a3b8 !important;
+    color: #64748b !important;
     text-transform: uppercase;
     letter-spacing: 0.06em;
     margin-bottom: 0.2rem;
@@ -119,15 +120,19 @@ p, li, span, label, .stMarkdown {
 .metric-card .m-value {
     font-size: 1.9rem;
     font-weight: 700;
-    color: #f8fafc !important;
+    color: #0f172a !important;
 }
 
 .feature-card {
-    background: rgba(255,255,255,0.04);
+    background: #ffffff;
     border-radius: 14px;
     padding: 1.2rem 1.4rem;
-    border: 1px solid rgba(255,255,255,0.07);
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.06);
     height: 100%;
+}
+.feature-card, .feature-card * {
+    color: #1e293b !important;
 }
 </style>
 """
@@ -208,8 +213,9 @@ if page == "Home":
             st.markdown(
                 f"""
                 <div style="text-align:center; padding:0.8rem 0.4rem; border-radius:10px;
-                            background: rgba(255,255,255,0.05); border-top: 3px solid {color};">
-                    <div style="font-weight:600; color:#f1f5f9; white-space:pre-line;">{step}</div>
+                            background: #ffffff; border-top: 3px solid {color};
+                            box-shadow: 0 2px 10px rgba(15, 23, 42, 0.06);">
+                    <div style="font-weight:600; color:#0f172a; white-space:pre-line;">{step}</div>
                 </div>
                 """,
                 unsafe_allow_html=True,
