@@ -11,9 +11,12 @@ streamlit
 joblib
 pyyaml
 tqdm
-pyabricate
-
-# External command-line tools (install via conda, not pip):
-#   prodigal   -> conda install -c bioconda prodigal
-#   abricate   -> conda install -c bioconda -c conda-forge abricate
-#   cd-hit     -> conda install -c bioconda cd-hit
+ 
+ 
+# External command-line tools — all apt-installable now, listed in
+# packages.txt for Streamlit Community Cloud (no conda required):
+#   prodigal    -> apt-get install prodigal
+#   cd-hit      -> apt-get install cd-hit
+#   ncbi-blast+ -> apt-get install ncbi-blast+
+#     (replaces ABRicate — see src/similarity_screening.py docstring
+#     and src/similarity_screening_abricate.py.bak for the old version)
