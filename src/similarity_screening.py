@@ -3,16 +3,11 @@ Module 3/4: Similarity-Based ARG Screening
 
 Wraps ABRicate (simplest option) or RGI/CARD to screen predicted genes
 against a curated ARG reference database.
-
-Install ABRicate first:
-    conda install -c bioconda -c conda-forge abricate
-    abricate --setupdb
-
-Usage note: ABRicate expects nucleotide gene sequences (the *_genes.fna
-output from gene_prediction.py), one FASTA of candidate genes.
 """
 import subprocess
 import csv
+import os
+import shutil
 from pathlib import Path
 
 
@@ -24,14 +19,24 @@ def run_arg_screening(genes_fasta: str, output_csv: str, db: str = "card") -> st
     output_csv = Path(output_csv)
     output_csv.parent.mkdir(parents=True, exist_ok=True)
 
-    cmd = ["abricate", "--db", db, str(genes_fasta)]
+    # 1. Start with the default system command name
+    executable = "abricate"
+
+    # 2. FIXED: If the system cannot find a global 'abricate', search our custom path
+    if shutil.which(executable) is None:
+        # Resolve the absolute path where our app cloned the binary repository
+        custom_path = os.path.abspath("abricate-master/bin/abricate")
+        if os.path.exists(custom_path):
+            executable = custom_path
+
+    cmd = [executable, "--db", db, str(genes_fasta)]
 
     try:
         result = subprocess.run(cmd, check=True, capture_output=True, text=True)
     except FileNotFoundError:
         raise RuntimeError(
             "ABRicate is not installed or not on PATH. "
-            "Install it with: conda install -c bioconda -c conda-forge abricate"
+            "Please ensure packages.txt is present and app.py successfully downloaded the repository."
         )
     except subprocess.CalledProcessError as e:
         raise RuntimeError(f"ABRicate failed:\n{e.stderr}")
