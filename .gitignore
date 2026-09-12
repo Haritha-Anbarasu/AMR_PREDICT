@@ -48,7 +48,8 @@ data/processed/_cdhit_work/
 # ==============================
 # Generated model files
 # ==============================
-models/
+models/*
+!models/**
 
 # ==============================
 # Generated results
