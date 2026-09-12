@@ -7,48 +7,9 @@ Pages: Home -> Genome Quality -> ARG Screening -> Results Table
        -> Explainability -> Download Report
 """
 import os
-import subprocess
 import streamlit as st
 import pandas as pd
 from pathlib import Path
-import shutil
-
-# --- ABRicate & CD-HIT Autoinstall Setup (Streamlit Cloud Cache Bypass Fix) ---
-@st.cache_resource
-def force_install_bioinformatics_tools():
-    """
-    Clones and configures ABRicate databases programmatically.
-    Renamed function to break the persistent cached state on Streamlit Cloud.
-    System binaries (cd-hit, ncbi-blast+, bioperl) must be declared in packages.txt
-    """
-    abricate_dir = os.path.abspath("abricate-master")
-    abricate_bin = os.path.join(abricate_dir, "bin", "abricate")
-    
-    # If the directory exists but the binary wasn't built correctly due to a previous crash, clear it
-    if os.path.exists(abricate_dir):
-        try:
-            shutil.rmtree(abricate_dir)
-        except Exception:
-            pass
-        
-    # Download and configure fresh with the correct full URL
-    with st.spinner("Downloading and configuring ABRicate databases..."):
-        # CORRECT FULL REPOSITORY URL
-        subprocess.run(
-            ["git", "clone", "https://github.com", abricate_dir], 
-            check=True
-        )
-        # Index the embedded databases (ResFinder, CARD, NCBI, etc.)
-        subprocess.run([abricate_bin, "--setupdb"], check=True)
-            
-    # Inject ABRicate binary path directly into the running instance's system PATH
-    abricate_bin_path = os.path.join(abricate_dir, "bin")
-    if abricate_bin_path not in os.environ["PATH"]:
-        os.environ["PATH"] = abricate_bin_path + os.path.pathsep + os.environ["PATH"]
-
-# This runs once immediately when the application container fires up
-force_install_bioinformatics_tools()
-# ----------------------------------------------------------------------
 
 from main import run_pipeline
 from src.streamlit_explainability import render_explainability_page
