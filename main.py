@@ -7,14 +7,6 @@ QC -> gene prediction -> ARG similarity screening -> feature extraction
 
 Usage:
     python main.py --genome data/reference/genome.fasta --outdir results/run1
-
-run_pipeline() returns a dict (not just the results DataFrame) so callers
-like app.py can access the genome QC info and the scaled feature matrix
-needed for SHAP explainability, in addition to the final results table.
-This was previously a real bug: qc was computed but never returned or
-stored anywhere, so app.py's "Genome Quality" page always showed "run
-an analysis first" even right after a successful run — fixed here by
-including it in the return value instead of only printing it.
 """
 import argparse
 import pandas as pd
@@ -54,13 +46,7 @@ def run_pipeline(genome_fasta: str, outdir: str) -> dict:
     models = load_models()
     ml_results = run_ml_prediction(features, models)
 
-    # Scaled feature matrix for downstream SHAP explainability, using the
-    # SAME fitted scaler the model was trained with, over the SAME
-    # feature columns `features` already has (this is literally the
-    # DataFrame that gets fed into prediction, before scaling) — so this
-    # is guaranteed consistent with what the model actually saw, with no
-    # separate feature-recomputation step that could silently drift out
-    # of sync with training.
+    # Scaled feature matrix for downstream SHAP explainability
     X_scaled = pd.DataFrame(
         models["scaler"].transform(features),
         columns=features.columns,
