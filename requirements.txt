@@ -11,7 +11,7 @@ streamlit
 joblib
 pyyaml
 tqdm
-
+pyabricate
 
 # External command-line tools (install via conda, not pip):
 #   prodigal   -> conda install -c bioconda prodigal
