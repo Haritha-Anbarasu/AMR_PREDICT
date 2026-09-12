@@ -4,12 +4,9 @@ Module 2: Gene / ORF Prediction
 Wraps Prodigal (external tool) to call genes from an assembled genome
 and produce nucleotide + protein FASTA outputs. Python acts as the
 pipeline controller, not the gene caller.
-
-Install Prodigal first:
-    conda install -c bioconda prodigal
-    (or) sudo apt-get install prodigal
 """
 import subprocess
+import shutil
 from pathlib import Path
 
 
@@ -27,8 +24,17 @@ def predict_genes(genome_fasta: str, output_dir: str, prefix: str = "genome") ->
     aa_out = output_dir / f"{prefix}_genes.faa"
     gff_out = output_dir / f"{prefix}_genes.gff"
 
+    # Start with standard binary name
+    executable = "prodigal"
+    
+    # Verify that the container platform can locate the binary globally
+    if shutil.which(executable) is None:
+        # Fallback to standard Linux binary path if PATH execution index is delayed
+        if Path("/usr/bin/prodigal").exists():
+            executable = "/usr/bin/prodigal"
+
     cmd = [
-        "prodigal",
+        executable,
         "-i", str(genome_fasta),
         "-d", str(nt_out),   # nucleotide gene sequences
         "-a", str(aa_out),   # protein translations
@@ -41,7 +47,7 @@ def predict_genes(genome_fasta: str, output_dir: str, prefix: str = "genome") ->
     except FileNotFoundError:
         raise RuntimeError(
             "Prodigal is not installed or not on PATH. "
-            "Install it with: conda install -c bioconda prodigal"
+            "Please ensure 'prodigal' is listed inside your packages.txt file at the repository root."
         )
     except subprocess.CalledProcessError as e:
         raise RuntimeError(f"Prodigal failed:\n{e.stderr}")
