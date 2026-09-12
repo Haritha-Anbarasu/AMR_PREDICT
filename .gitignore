@@ -1,5 +1,4 @@
-# ==============================
-# Python
+# =============================# Python
 # ==============================
 __pycache__/
 *.py[cod]
@@ -23,7 +22,9 @@ venv/
 # Raw / downloaded databases
 # ==============================
 data/raw/
-data/raw_downloads/
+data/raw_downloads/*
+!data/raw_downloads/card/
+!data/raw_downloads/card/**
 data/raw_negative_build/
 
 # ==============================
