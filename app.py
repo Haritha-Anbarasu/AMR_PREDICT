@@ -320,7 +320,35 @@ elif page == "Results Table":
     st.header("📋 ARG Prediction Results")
     df = st.session_state.results
     if df is not None:
-        st.dataframe(df, use_container_width=True)
+        CATEGORY_COLORS = {
+            "Confirmed ARG": "#fecaca",       # light red
+            "Potential ARG": "#fde68a",       # light amber
+            "Non-ARG-like sequence": "#e2e8f0",  # neutral grey (no real highlight)
+        }
+
+        def _highlight_row(row):
+            color = CATEGORY_COLORS.get(row.get("final_category"), "")
+            return [f"background-color: {color}; color: #0f172a"] * len(row)
+
+        if "final_category" in df.columns:
+            styled_df = df.style.apply(_highlight_row, axis=1)
+            st.dataframe(styled_df, use_container_width=True)
+
+            st.markdown(
+                """
+                <div style="display:flex; gap:1.5rem; margin-top:0.6rem; flex-wrap:wrap;">
+                    <span><span style="display:inline-block;width:12px;height:12px;
+                        background:#fecaca;border-radius:3px;margin-right:6px;"></span>Confirmed ARG</span>
+                    <span><span style="display:inline-block;width:12px;height:12px;
+                        background:#fde68a;border-radius:3px;margin-right:6px;"></span>Potential ARG</span>
+                    <span><span style="display:inline-block;width:12px;height:12px;
+                        background:#e2e8f0;border-radius:3px;margin-right:6px;"></span>Non-ARG-like sequence</span>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+        else:
+            st.dataframe(df, use_container_width=True)
     else:
         st.info("Run an analysis from the Home page first.")
 
