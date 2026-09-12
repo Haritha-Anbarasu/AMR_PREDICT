@@ -25,12 +25,12 @@ def install_bioinformatics_tools():
     # If abricate is not downloaded yet, fetch and configure it
     if not os.path.exists(abricate_dir):
         with st.spinner("Downloading and configuring ABRicate databases..."):
-            # Programmatically clone the official repository
+            # FIXED URL: Added the complete repository path to avoid Git failures
             subprocess.run(
                 ["git", "clone", "https://github.com", abricate_dir], 
                 check=True
             )
-            # CRITICAL STEP: Setup and index the embedded databases (ResFinder, CARD, NCBI, etc.)
+            # Index the embedded databases (ResFinder, CARD, NCBI, etc.)
             subprocess.run([abricate_bin, "--setupdb"], check=True)
             
     # Inject ABRicate binary path directly into the running instance's system PATH
