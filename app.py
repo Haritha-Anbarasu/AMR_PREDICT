@@ -6,7 +6,6 @@ Run with: streamlit run app.py
 Pages: Home -> Genome Quality -> ARG Screening -> Results Table
        -> Explainability -> Download Report
 """
-import os
 import streamlit as st
 import pandas as pd
 from pathlib import Path
@@ -14,8 +13,145 @@ from pathlib import Path
 from main import run_pipeline
 from src.streamlit_explainability import render_explainability_page
 
-st.set_page_config(page_title="AMR-PREDICT", layout="wide")
+st.set_page_config(page_title="AMR-PREDICT", layout="wide", page_icon="🧬")
 
+# ---------------- Global theme ----------------
+CUSTOM_CSS = """
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+html, body, [class*="css"]  {
+    font-family: 'Poppins', sans-serif;
+}
+
+.stApp {
+    background: linear-gradient(160deg, #0b1120 0%, #161233 45%, #0b1120 100%);
+}
+
+section[data-testid="stSidebar"] {
+    background: linear-gradient(180deg, #161233 0%, #0b1120 100%);
+    border-right: 1px solid rgba(255,255,255,0.06);
+}
+section[data-testid="stSidebar"] * {
+    color: #e2e8f0 !important;
+}
+
+h1, h2, h3, h4 {
+    color: #f8fafc !important;
+}
+p, li, span, label, .stMarkdown {
+    color: #cbd5e1;
+}
+
+.stButton > button {
+    background: linear-gradient(90deg, #2563eb, #9333ea);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 0.6rem 1.6rem;
+    font-weight: 600;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);
+}
+.stButton > button:hover {
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: 0 6px 18px rgba(124, 58, 237, 0.5);
+}
+
+[data-testid="stFileUploader"] {
+    border: 1.5px dashed rgba(148, 163, 184, 0.4);
+    border-radius: 12px;
+    padding: 0.5rem;
+}
+
+.hero-wrap {
+    position: relative;
+    border-radius: 18px;
+    overflow: hidden;
+    margin-bottom: 1.6rem;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.45);
+}
+.hero-wrap img {
+    width: 100%;
+    display: block;
+    max-height: 300px;
+    object-fit: cover;
+    filter: brightness(0.55) saturate(1.15);
+}
+.hero-text {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 2rem 2.5rem;
+}
+.hero-text h1 {
+    font-size: 2.6rem;
+    margin: 0;
+    background: linear-gradient(90deg, #60a5fa, #c084fc, #f472b6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent !important;
+}
+.hero-text p {
+    color: #e2e8f0 !important;
+    font-size: 1.1rem;
+    margin-top: 0.4rem;
+    max-width: 640px;
+}
+
+.metric-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-left: 5px solid var(--accent, #2563eb);
+    border-radius: 12px;
+    padding: 1rem 1.3rem;
+    margin-bottom: 0.9rem;
+}
+.metric-card .m-label {
+    font-size: 0.8rem;
+    color: #94a3b8 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.2rem;
+}
+.metric-card .m-value {
+    font-size: 1.9rem;
+    font-weight: 700;
+    color: #f8fafc !important;
+}
+
+.feature-card {
+    background: rgba(255,255,255,0.04);
+    border-radius: 14px;
+    padding: 1.2rem 1.4rem;
+    border: 1px solid rgba(255,255,255,0.07);
+    height: 100%;
+}
+</style>
+"""
+st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
+
+
+def metric_card(label: str, value, color: str = "#2563eb"):
+    st.markdown(
+        f"""
+        <div class="metric-card" style="border-left-color:{color};">
+            <div class="m-label">{label}</div>
+            <div class="m-value">{value}</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+HERO_IMAGE_URL = (
+    "https://images.unsplash.com/photo-1576086213369-97a306d36557"
+    "?fm=jpg&q=80&w=1600&auto=format&fit=crop"
+)
+
+# ---------------- Session state ----------------
 if "results" not in st.session_state:
     st.session_state.results = None
 if "qc" not in st.session_state:
@@ -31,49 +167,23 @@ page = st.sidebar.radio(
 )
 
 # ---------------- Home ----------------
-DNA_BANNER_SVG = """
-<div style="text-align:center; margin-bottom: 1rem;">
-<svg width="100%" height="140" viewBox="0 0 900 140" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="strandA" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0%" stop-color="#2563eb"/>
-      <stop offset="100%" stop-color="#7c3aed"/>
-    </linearGradient>
-    <linearGradient id="strandB" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0%" stop-color="#059669"/>
-      <stop offset="100%" stop-color="#0891b2"/>
-    </linearGradient>
-  </defs>
-  <path d="M0,20 C 75,90 150,-30 225,20 C 300,90 375,-30 450,20 C 525,90 600,-30 675,20 C 750,90 825,-30 900,20"
-        fill="none" stroke="url(#strandA)" stroke-width="6" stroke-linecap="round"/>
-  <path d="M0,110 C 75,40 150,160 225,110 C 300,40 375,160 450,110 C 525,40 600,160 675,110 C 750,40 825,160 900,110"
-        fill="none" stroke="url(#strandB)" stroke-width="6" stroke-linecap="round"/>
-  <g stroke="#94a3b8" stroke-width="2">
-    <line x1="37"  y1="55"  x2="37"  y2="75"/>
-    <line x1="112" y1="65"  x2="112" y2="90"/>
-    <line x1="187" y1="45"  x2="187" y2="70"/>
-    <line x1="262" y1="55"  x2="262" y2="75"/>
-    <line x1="337" y1="65"  x2="337" y2="90"/>
-    <line x1="412" y1="45"  x2="412" y2="70"/>
-    <line x1="487" y1="55"  x2="487" y2="75"/>
-    <line x1="562" y1="65"  x2="562" y2="90"/>
-    <line x1="637" y1="45"  x2="637" y2="70"/>
-    <line x1="712" y1="55"  x2="712" y2="75"/>
-    <line x1="787" y1="65"  x2="787" y2="90"/>
-    <line x1="862" y1="45"  x2="862" y2="70"/>
-  </g>
-</svg>
-</div>
-"""
-
 if page == "Home":
-    st.markdown(DNA_BANNER_SVG, unsafe_allow_html=True)
+    st.markdown(
+        f"""
+        <div class="hero-wrap">
+            <img src="{HERO_IMAGE_URL}" alt="Fluorescence microscopy of DNA">
+            <div class="hero-text">
+                <h1>🧬 AMR-PREDICT</h1>
+                <p>Machine Learning-Based Antibiotic Resistance Gene Prediction</p>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    st.caption("Image: National Cancer Institute / Unsplash")
 
     st.markdown(
         """
-        # 🧬 AMR-PREDICT
-        ### Machine Learning-Based Antibiotic Resistance Gene Prediction
-
         **A computational platform for sequence-based prediction of antibiotic resistance genes**
 
         Antimicrobial resistance (AMR) is a major global health concern, driven in part by the
@@ -89,24 +199,45 @@ if page == "Home":
     )
 
     st.markdown("### 🔬 Analytical Workflow")
-    st.markdown(
-        "**Sequence Input** → **Sequence Processing** → **Feature Extraction** "
-        "→ **Machine Learning Prediction** → **ARG Classification & Results**"
-    )
+    steps = ["Sequence\nInput", "Sequence\nProcessing", "Feature\nExtraction",
+             "ML\nPrediction", "ARG\nClassification"]
+    step_colors = ["#3b82f6", "#8b5cf6", "#d946ef", "#f97316", "#22c55e"]
+    cols = st.columns(len(steps))
+    for c, step, color in zip(cols, steps, step_colors):
+        with c:
+            st.markdown(
+                f"""
+                <div style="text-align:center; padding:0.8rem 0.4rem; border-radius:10px;
+                            background: rgba(255,255,255,0.05); border-top: 3px solid {color};">
+                    <div style="font-weight:600; color:#f1f5f9; white-space:pre-line;">{step}</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
 
     st.markdown("### Key Features")
     col1, col2 = st.columns(2)
     with col1:
         st.markdown(
-            "- Sequence-based ARG prediction\n"
-            "- Machine learning-driven classification\n"
-            "- Automated computational analysis"
+            """
+            <div class="feature-card">
+            ✅ Sequence-based ARG prediction<br>
+            ✅ Machine learning-driven classification<br>
+            ✅ Automated computational analysis
+            </div>
+            """,
+            unsafe_allow_html=True,
         )
     with col2:
         st.markdown(
-            "- Rapid screening of sequence data\n"
-            "- User-friendly prediction interface\n"
-            "- Results supporting downstream AMR research"
+            """
+            <div class="feature-card">
+            ⚡ Rapid screening of sequence data<br>
+            🖥️ User-friendly prediction interface<br>
+            📊 Results supporting downstream AMR research
+            </div>
+            """,
+            unsafe_allow_html=True,
         )
 
     st.markdown("### Research Application")
@@ -146,32 +277,41 @@ if page == "Home":
 
 # ---------------- Genome Quality ----------------
 elif page == "Genome Quality":
-    st.header("Genome Quality Control")
+    st.header("🧫 Genome Quality Control")
     if st.session_state.qc:
         qc = st.session_state.qc
         col1, col2, col3, col4 = st.columns(4)
-        col1.metric("Genome Size", f"{qc['genome_size_mb']} Mb")
-        col2.metric("GC Content", f"{qc['gc_content_pct']}%")
-        col3.metric("Contigs", qc["num_contigs"])
-        col4.metric("Quality", qc["quality_status"])
+        with col1:
+            metric_card("Genome Size", f"{qc['genome_size_mb']} Mb", "#3b82f6")
+        with col2:
+            metric_card("GC Content", f"{qc['gc_content_pct']}%", "#8b5cf6")
+        with col3:
+            metric_card("Contigs", qc["num_contigs"], "#06b6d4")
+        with col4:
+            metric_card("Quality", qc["quality_status"], "#22c55e")
     else:
         st.info("Run an analysis from the Home page first.")
 
 # ---------------- ARG Screening ----------------
 elif page == "ARG Screening":
-    st.header("ARG Screening Summary")
+    st.header("🧬 ARG Screening Summary")
     df = st.session_state.results
     if df is not None:
-        st.metric("Total Genes Screened", len(df))
-        st.metric("Confirmed ARGs", (df["final_category"] == "Confirmed ARG").sum())
-        st.metric("Potential ARGs", (df["final_category"] == "Potential ARG").sum())
-        st.metric("Non-ARG-like", (df["final_category"] == "Non-ARG-like sequence").sum())
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            metric_card("Total Genes Screened", len(df), "#3b82f6")
+        with col2:
+            metric_card("Confirmed ARGs", (df["final_category"] == "Confirmed ARG").sum(), "#e11d48")
+        with col3:
+            metric_card("Potential ARGs", (df["final_category"] == "Potential ARG").sum(), "#f59e0b")
+        with col4:
+            metric_card("Non-ARG-like", (df["final_category"] == "Non-ARG-like sequence").sum(), "#22c55e")
     else:
         st.info("Run an analysis from the Home page first.")
 
 # ---------------- Results Table ----------------
 elif page == "Results Table":
-    st.header("ARG Prediction Results")
+    st.header("📋 ARG Prediction Results")
     df = st.session_state.results
     if df is not None:
         st.dataframe(df, use_container_width=True)
@@ -189,7 +329,7 @@ elif page == "Explainability":
 
 # ---------------- Download Report ----------------
 elif page == "Download Report":
-    st.header("Download Report")
+    st.header("⬇️ Download Report")
     df = st.session_state.results
     if df is not None:
         st.download_button("Download CSV", df.to_csv().encode(), "ARG_prediction_results.csv")
