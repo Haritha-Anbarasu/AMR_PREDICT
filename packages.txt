@@ -1,10 +1,12 @@
 prodigal
 cd-hit
-emboss
 bioperl
 ncbi-blast+
+gzip
+unzip
+git
 libjson-perl
 libtext-csv-perl
-libfile-slurp-perl
+libpath-tiny-perl
 liblwp-protocol-https-perl
 libwww-perl
