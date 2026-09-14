@@ -21,11 +21,15 @@ venv/
 # ==============================
 # Raw / downloaded databases
 # ==============================
-data/raw/
 data/raw_downloads/*
 !data/raw_downloads/card/
 !data/raw_downloads/card/**
-data/raw_negative_build/
+!data/raw_downloads/resfinder/
+!data/raw_downloads/resfinder/**
+!data/raw_downloads/megares/
+!data/raw_downloads/megares/**
+!data/raw_downloads/amrfinderplus/
+!data/raw_downloads/amrfinderplus/**
 
 # ==============================
 # Large / generated datasets
